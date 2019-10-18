@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>python-editor</title>
+    <link href="editor.css" type="text/css" rel="stylesheet"/>
+    <script src="editor.js" type="text/javascript"></script>
+    <script src="qwebchannel.js" type="text/javascript"></script>
+    <script>
+        new QWebChannel(qt.webChannelTransport,
+            function (channel) {
+                window.Bridge = channel.objects.Bridge;
+
+                // 绑定自定义的信号customSignal
+                Bridge.customSignal.connect(function (file, text) {
+                    // g_filename = file;
+                    // g_editor.setValue(text);
+                    if (currtab) {
+                        Bridge.callFromJs(g_filename, g_editor.getValue());
+                        update_tab(file, text);
+                        g_filename = file;
+                        g_editor.setValue(text);
+                    } else {
+                        add_tab(file, text)
+                    }
+                });
+                Bridge.saveSignal.connect(function () {
+                    save_strategy(g_filename, g_editor.getValue())
+                })
+            }
+        );
+
+        function save_strategy(file, text) {
+            Bridge.callFromJs(file, text);
+        }
+    </script>
+    <script src="monaco-editor-0.16.2/package/min/vs/loader.js"></script>
+</head>
+
+<body>
+<!--标签栏-->
+<ul id="tabs">
+</ul>
+
+<!--编辑器-->
+<div id="editor">
+    <script type="text/javascript">
+        init_editor("editor", "# equant code editor\n\n");
+    </script>
+</div>
+</body>
+
+</html>
